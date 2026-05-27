@@ -42,11 +42,6 @@ fn sparql11_query_w3c_evaluation_testsuite() -> Result<()> {
             "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/negation/manifest#graph-minus",
             "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/aggregates/manifest#agg-empty-group-count-graph",
             "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/bindings/manifest#graph",
-            // Our property path handling is wrong
-            "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/property-path/manifest#zero_or_more_set_start",
-            "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/property-path/manifest#zero_or_more_set_end",
-            "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/property-path/manifest#zero_or_one_set_start",
-            "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/property-path/manifest#zero_or_one_set_end",
         ],
     )
 }
