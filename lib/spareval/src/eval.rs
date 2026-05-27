@@ -2990,9 +2990,7 @@ impl<'a, D: QueryableDataset<'a>> PathEvaluator<'a, D> {
             }
             PropertyPath::ZeroOrMore(p) => {
                 if start == end {
-                    // SPARQL 1.1 §18.4: ALP(x, path) adds x to the result multiset
-                    // before any graph lookup; x ∈ ALP(x, P) is always true.
-                    true
+                    self.is_subject_or_object_in_graph(start, graph_name)?
                 } else {
                     look_in_transitive_closure(
                         self.eval_from_in_graph(p, start, graph_name),
@@ -3008,9 +3006,7 @@ impl<'a, D: QueryableDataset<'a>> PathEvaluator<'a, D> {
             )?,
             PropertyPath::ZeroOrOne(p) => {
                 if start == end {
-                    // SPARQL 1.1 §18.4: zero-hop step is unconditional when both
-                    // endpoints resolve to the same term.
-                    true
+                    self.is_subject_or_object_in_graph(start, graph_name)?
                 } else {
                     self.eval_closed_in_graph(p, start, end, graph_name)?
                 }
@@ -3657,6 +3653,28 @@ impl<'a, D: QueryableDataset<'a>> PathEvaluator<'a, D> {
                     Ok((t.object.clone(), t.object, t.graph_name)),
                 ]
             })
+    }
+
+    fn is_subject_or_object_in_graph(
+        &self,
+        term: &D::InternalTerm,
+        graph_name: Option<&D::InternalTerm>,
+    ) -> Result<bool, QueryEvaluationError> {
+        if self
+            .dataset
+            .internal_quads_for_pattern(Some(term), None, None, Some(graph_name))
+            .next()
+            .transpose()?
+            .is_some()
+        {
+            return Ok(true);
+        }
+        Ok(self
+            .dataset
+            .internal_quads_for_pattern(None, None, Some(term), Some(graph_name))
+            .next()
+            .transpose()?
+            .is_some())
     }
 
     fn run_if_term_is_a_dataset_node<
