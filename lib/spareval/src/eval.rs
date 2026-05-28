@@ -3006,10 +3006,10 @@ impl<'a, D: QueryableDataset<'a>> PathEvaluator<'a, D> {
             )?,
             PropertyPath::ZeroOrOne(p) => {
                 if start == end {
-                    self.is_subject_or_object_in_graph(start, graph_name)?
+                    self.is_subject_or_object_in_graph(start, graph_name)
                 } else {
-                    self.eval_closed_in_graph(p, start, end, graph_name)?
-                }
+                    self.eval_closed_in_graph(p, start, end, graph_name)
+                }?
             }
             PropertyPath::NegatedPropertySet(ps) => self
                 .dataset
@@ -3660,21 +3660,18 @@ impl<'a, D: QueryableDataset<'a>> PathEvaluator<'a, D> {
         term: &D::InternalTerm,
         graph_name: Option<&D::InternalTerm>,
     ) -> Result<bool, QueryEvaluationError> {
-        if self
+        Ok(self
             .dataset
             .internal_quads_for_pattern(Some(term), None, None, Some(graph_name))
             .next()
             .transpose()?
             .is_some()
-        {
-            return Ok(true);
-        }
-        Ok(self
-            .dataset
-            .internal_quads_for_pattern(None, None, Some(term), Some(graph_name))
-            .next()
-            .transpose()?
-            .is_some())
+            || self
+                .dataset
+                .internal_quads_for_pattern(None, None, Some(term), Some(graph_name))
+                .next()
+                .transpose()?
+                .is_some())
     }
 
     fn run_if_term_is_a_dataset_node<
