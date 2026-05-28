@@ -3156,9 +3156,7 @@ impl<'a, D: QueryableDataset<'a>> PathEvaluator<'a, D> {
                     .chain(self.eval_from_in_graph(b, start, graph_name)),
             )),
             PropertyPath::ZeroOrMore(p) => {
-                // SPARQL 1.1 §18.4 ALP: the start term is added to the result
-                // multiset unconditionally, before any graph lookup, regardless
-                // of whether it appears as a subject or object in the dataset.
+                // The ALP zero-hop step adds `start` to the result before any graph lookup.
                 let eval = self.clone();
                 let p = Rc::clone(p);
                 let graph_name2 = graph_name.cloned();
@@ -3176,11 +3174,9 @@ impl<'a, D: QueryableDataset<'a>> PathEvaluator<'a, D> {
                 ))
             }
             PropertyPath::ZeroOrOne(p) => {
-                // SPARQL 1.1 §18.4: the zero-hop step yields the start term
-                // unconditionally; no graph-node membership guard.
+                // The zero-hop step yields `start` even if it is not a graph node.
                 Box::new(hash_deduplicate(
-                    once(Ok(start.clone()))
-                        .chain(self.eval_from_in_graph(p, start, graph_name)),
+                    once(Ok(start.clone())).chain(self.eval_from_in_graph(p, start, graph_name)),
                 ))
             }
             PropertyPath::NegatedPropertySet(ps) => {
@@ -3323,8 +3319,7 @@ impl<'a, D: QueryableDataset<'a>> PathEvaluator<'a, D> {
                     .chain(self.eval_to_in_graph(b, end, graph_name)),
             )),
             PropertyPath::ZeroOrMore(p) => {
-                // SPARQL 1.1 §18.4: the symmetric ALP applied to the bound `end`
-                // adds it unconditionally to the result multiset.
+                // Symmetric ALP: the zero-hop step adds `end` to the result before any graph lookup.
                 let eval = self.clone();
                 let p = Rc::clone(p);
                 let graph_name2 = graph_name.cloned();
